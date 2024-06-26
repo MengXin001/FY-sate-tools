@@ -15,18 +15,24 @@ def cal_bt(dataset, intercept, slope):
     dataset = dataset * slope + intercept
     return dataset
 
+def autodecode(string, encoding="gbk"):
+    return string.decode(encoding) if isinstance(string, bytes) else string
+
 class MWRIReader(object):
 
     def __init__(self, fname, dataset="bt_89v"):
         self.file = h5py.File(fname, "r")
         try:
-            self.attrs = dict((j, k.decode("utf-8") if isinstance(k, bytes) else k ) for j, k in dict(self.file.attrs))
+            self.attrs = {k, autodecode(v) for k, v in self.file.attrs.items()}
             if self.attrs["Satellite Name"] == "FY-3D":
                 self.available_datasets = MWRI_DATASETS["S1"]
                 self._3D_reader(dataset)
             elif self.attrs["Satellite Name"] == "FY-3G":
                 self.available_datasets = MWRI_DATASETS["S1"] + MWRI_DATASETS["S2"]
                 self._3G_reader(dataset)
+            elif self.attrs["Satellite Name"] == "FY-3F":
+                self.available_datasets = MWRI_DATASETS["S1"] + MWRI_DATASETS["S2"]
+                self._3F_reader(dataset)
             else:
                 raise Exception(f"Unable to decode data:\n{fname}")
         except Exception as e:
@@ -60,6 +66,27 @@ class MWRIReader(object):
         except Exception as e:
             raise e
         EOB = datasets["Data"][flag]
+        self.intercept = EOB.attrs["Intercept"]
+        self.slope = EOB.attrs["Slope"]
+        lons, lats = datasets["Geolocation"]["Longitude"][:], datasets["Geolocation"]["Latitude"][:]
+        data = dict()
+        data["lons"], data["lats"] = lons, lats
+        data["datasets"] = cal_bt(EOB[:,:,index], self.intercept, self.slope)
+        self.data = data
+
+    def _3F_reader(self, dataset):
+        try:
+            if dataset in MWRI_DATASETS["S1"]:
+                index = MWRI_DATASETS["S1"].index(dataset)
+                datasets = self.file["Window Channel"]
+            elif dataset in MWRI_DATASETS["S2"]:
+                index = MWRI_DATASETS["S2"].index(dataset)
+                datasets = self.file["Sounding Channel"]
+            else:
+                raise Exception(f"Unavailable dataset: {dataset}")
+        except Exception as e:
+            raise e
+        EOB = datasets["Calibration"]["EARTH_OBSERVE_BT"]
         self.intercept = EOB.attrs["Intercept"]
         self.slope = EOB.attrs["Slope"]
         lons, lats = datasets["Geolocation"]["Longitude"][:], datasets["Geolocation"]["Latitude"][:]

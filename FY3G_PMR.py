@@ -6,6 +6,9 @@ import h5py
 import numpy as np
 from datetime import datetime
 
+def autodecode(string, encoding="gbk"):
+    return string.decode(encoding) if isinstance(string, bytes) else string
+
 class PMRReader(object):
     """The base class reading FY-3G PMR L2 data.
 
@@ -18,7 +21,7 @@ class PMRReader(object):
 
     def __init__(self, fname, datafield="SLV", dataset="zFactorCorrectedESurface", level=1):
         self.file = h5py.File(fname, "r")
-        self.attrs = dict((j, k.decode("utf-8") if isinstance(k, bytes) else k ) for j, k in dict(self.file.attrs))
+        self.attrs = {k, autodecode(v) for k, v in self.file.attrs.items()}
         self.datafield = datafield
         self.dataset = dataset
         self.level = level
