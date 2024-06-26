@@ -21,7 +21,7 @@ class PMRReader(object):
 
     def __init__(self, fname, datafield="SLV", dataset="zFactorCorrectedESurface", level=1):
         self.file = h5py.File(fname, "r")
-        self.attrs = {k, autodecode(v) for k, v in self.file.attrs.items()}
+        self.attrs = {k: autodecode(v) for k, v in self.file.attrs.items()}
         self.datafield = datafield
         self.dataset = dataset
         self.level = level

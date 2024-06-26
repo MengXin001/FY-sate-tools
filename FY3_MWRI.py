@@ -23,7 +23,7 @@ class MWRIReader(object):
     def __init__(self, fname, dataset="bt_89v"):
         self.file = h5py.File(fname, "r")
         try:
-            self.attrs = {k, autodecode(v) for k, v in self.file.attrs.items()}
+            self.attrs = {k: autodecode(v) for k, v in self.file.attrs.items()}
             if self.attrs["Satellite Name"] == "FY-3D":
                 self.available_datasets = MWRI_DATASETS["S1"]
                 self._3D_reader(dataset)
