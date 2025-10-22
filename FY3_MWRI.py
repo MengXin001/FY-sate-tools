@@ -5,18 +5,18 @@ import glob
 import h5py
 import numpy as np
 from datetime import datetime
+from utils import *
 
 MWRI_DATASETS = {
-    "S1": ["bt_10v","bt_10h","bt_18v","bt_18h","bt_23v","bt_23h","bt_36v","bt_36h","bt_89v","bt_89h"],
-    "S2": ["bt_50v","bt_50h","bt_52v","bt_52h","bt_53.24v","bt_53.24h","bt_53.75v","bt_53.75h","bt_118v","bt_165v","bt_183v"]
-    }
+    "S1": ["bt_10v", "bt_10h", "bt_18v", "bt_18h", "bt_23v", "bt_23h", "bt_36v", "bt_36h", "bt_89v", "bt_89h"],
+    "S2": ["bt_50v", "bt_50h", "bt_52v", "bt_52h", "bt_53.24v", "bt_53.24h", "bt_53.75v", "bt_53.75h", "bt_118v", "bt_165v", "bt_183v"]
+}
+
 
 def cal_bt(dataset, intercept, slope):
     dataset = dataset * slope + intercept
     return dataset
 
-def autodecode(string, encoding="gbk"):
-    return string.decode(encoding) if isinstance(string, bytes) else string
 
 class MWRIReader(object):
 
@@ -50,7 +50,7 @@ class MWRIReader(object):
         data["lons"], data["lats"] = lons, lats
         data["dataset"] = cal_bt(EOB[index], self.intercept, self.slope)
         self.data = data
-    
+
     def _3G_reader(self, dataset):
         try:
             if dataset in MWRI_DATASETS["S1"]:
@@ -71,7 +71,7 @@ class MWRIReader(object):
         lons, lats = datasets["Geolocation"]["Longitude"][:], datasets["Geolocation"]["Latitude"][:]
         data = dict()
         data["lons"], data["lats"] = lons, lats
-        data["datasets"] = cal_bt(EOB[:,:,index], self.intercept, self.slope)
+        data["datasets"] = cal_bt(EOB[:, :, index], self.intercept, self.slope)
         self.data = data
 
     def _3F_reader(self, dataset):
@@ -92,9 +92,10 @@ class MWRIReader(object):
         lons, lats = datasets["Geolocation"]["Longitude"][:], datasets["Geolocation"]["Latitude"][:]
         data = dict()
         data["lons"], data["lats"] = lons, lats
-        data["datasets"] = cal_bt(EOB[:,:,index], self.intercept, self.slope)
+        data["datasets"] = cal_bt(EOB[:, :, index], self.intercept, self.slope)
         self.data = data
 
+    @property
     def all_available_datasets(self):
         return self.available_datasets
 
@@ -113,6 +114,7 @@ class MWRIReader(object):
             return datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S.%fZ")
         except ValueError:
             return datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%SZ")
+
 
 if __name__ == "__main__":
     fname = "C:/Users/Administrator/Desktop/FY3D_MWRIA_GBAL_L1_20210504_0514_010KM_MS.HDF"
