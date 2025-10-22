@@ -8,7 +8,7 @@ from utils import *
 
 MWHS_DATASETS = {
     "MWHS2": ["bt_89h", "bt_118_0.08v", "bt_118_0.2v", "bt_118_0.3v", "bt_118_0.8v", "bt_118_1.1v", "bt_118_2.5v", "bt_118_3.0v", "bt_118_5.0v", "bt_166h", "bt_183_1.0v", "bt_183_1.8v", "bt_183_3.0v", "bt_183_4.5v", "bt_183_7.0v"],
-    "MWHSX": ["bt_89h", "bt_118_0.08v", "bt_118_0.2v", "bt_118_0.3v", "bt_118_0.8v", "bt_118_1.1v", "bt_118_2.5v", "bt_118_3.0v", "bt_118_5.0v", "bt_150v", "bt_183_1.0v", "bt_183_1.8v", "bt_183_3.0v", "bt_183_4.5v", "bt_183_7.0v"]
+    "MWHSX": ["bt_89v", "bt_118_0.08v", "bt_118_0.2v", "bt_118_0.3v", "bt_118_0.8v", "bt_118_1.1v", "bt_118_2.5v", "bt_118_3.0v", "bt_118_5.0v", "bt_150v", "bt_183_1.0v", "bt_183_1.8v", "bt_183_3.0v", "bt_183_4.5v", "bt_183_7.0v"]
 }
 SENSOR_NAMES = ["Advanced Microwave Humidity Sounder", "MicroWave Humidity Sounder-II"]
 
@@ -24,7 +24,7 @@ class MWHSReader():
                 elif self.attrs["Sensor Name"] == "Advanced Microwave Humidity Sounder":
                     self.available_datasets = MWHS_DATASETS["MWHSX"]
                 else:
-                    raise Exception(f"Unknown sensor: {self.attrs["Sensor Name"]}")
+                    raise Exception(f"Not currently supported sensor: {self.attrs['Sensor Name']}")
                 if dataset not in self.available_datasets:
                     raise Exception(f"Not found dataset {dataset} in {self.available_datasets}")
                 self._MWHS2_reader(dataset)
